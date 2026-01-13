@@ -509,7 +509,7 @@ setShowAddRecipe(true);
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <ChefHat className="w-8 h-8 text-blue-600" />
-              <h1 className="text-3xl font-bold text-gray-800">Smart Meal Planner</h1>
+              <h1 className="text-3xl font-bold text-gray-800">Smarty Meal Planner</h1>
             </div>
             <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
               <Upload className="w-4 h-4" />
