@@ -1,9 +1,14 @@
 {
+  "version": 2,
   "functions": {
-    "api/extract-recipe.js": {
-      "runtime": "nodejs18.x",
-      "memory": 1024,
-      "maxDuration": 15
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    }
+  ]
 }
