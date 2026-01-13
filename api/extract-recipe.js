@@ -45,13 +45,37 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await claudeResponse.json();
-    return res.status(200).json(data);
+   const raw = await claudeResponse.json();
 
-  } catch (error) {
-    return res.status(500).json({
-      error: "Server error",
-      message: error.message
-    });
+const text =
+  raw?.content?.find(c => c.type === "text")?.text || "";
+
+const match = text.match(/\{[\s\S]*\}/);
+
+if (!match) {
+  return res.status(422).json({
+    error: "Claude did not return JSON",
+    rawText: text
+  });
+}
+
+let parsed;
+try {
+  parsed = JSON.parse(match[0]);
+} catch (err) {
+  return res.status(422).json({
+    error: "Invalid JSON from Claude",
+    rawText: text
+  });
+}
+
+return res.status(200).json({
+  servings: parsed.servings ?? 4,
+  cuisine: parsed.cuisine ?? "Other",
+  ingredients: Array.isArray(parsed.ingredients)
+    ? parsed.ingredients
+    : []
+});
+
   }
 }
