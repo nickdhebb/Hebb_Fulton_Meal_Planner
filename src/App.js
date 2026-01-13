@@ -2,136 +2,127 @@ import React, { useState, useEffect } from 'react';
 import { Upload, Plus, Trash2, Download, ChefHat, ShoppingCart, Users, Edit2 } from 'lucide-react';
 import * as mammoth from 'mammoth';
 
-const RecipeForm = ({ recipe, onSave, onCancel, existingRecipes }) => {
-  const [formData, setFormData] = useState(recipe || {
-    name: '',
-    cuisine: 'Other',
-    ingredients: [],
-    servings: 4
+const RecipeForm = ({ recipe, onSave, onCancel }) => {
+  const [formData, setFormData] = useState(
+    recipe || { name: "", cuisine: "Other", servings: 4, ingredients: [] }
+  );
+
+  const [ingredient, setIngredient] = useState({
+    amount: "",
+    unit: "",
+    name: ""
   });
-  const [newIngredient, setNewIngredient] = useState({ amount: '', unit: '', name: '' });
 
   const addIngredient = () => {
-    if (newIngredient.name.trim()) {
-      setFormData({
-        ...formData,
-        ingredients: [...formData.ingredients, { ...newIngredient }]
-      });
-      setNewIngredient({ amount: '', unit: '', name: '' });
-    }
-  };
-
-  const removeIngredient = (index) => {
+    if (!ingredient.name.trim()) return;
     setFormData({
       ...formData,
-      ingredients: formData.ingredients.filter((_, i) => i !== index)
+      ingredients: [...formData.ingredients, ingredient]
     });
+    setIngredient({ amount: "", unit: "", name: "" });
   };
 
-  const isPDFExtracted = recipe?.id && recipe.id !== null && existingRecipes && !existingRecipes.find(r => r.id === recipe.id);
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <h3 className="text-2xl font-bold mb-4">
-          {recipe?.id && existingRecipes && existingRecipes.find(r => r.id === recipe.id) ? 'Edit Recipe' : 'Add New Recipe'}
-        </h3>
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-          <div>
-            <label className="block text-sm font-semibold mb-1">Recipe Name:</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border rounded"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold mb-1">Cuisine Type:</label>
-              <select
-                value={formData.cuisine}
-                onChange={(e) => setFormData({ ...formData, cuisine: e.target.value })}
-                className="w-full px-3 py-2 border rounded"
-              >
-                {['Italian', 'Mexican', 'Asian', 'American', 'Mediterranean', 'Indian', 'French', 'Other'].map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1">Servings:</label>
-              <input
-                type="number"
-                min="1"
-                value={formData.servings}
-                onChange={(e) => setFormData({ ...formData, servings: parseInt(e.target.value) })}
-                disabled={isPDFExtracted}
-                className="w-full px-3 py-2 border rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
-                title={isPDFExtracted ? "Servings locked to recipe's original amount" : ""}
-              />
-              {isPDFExtracted && (
-                <p className="text-xs text-gray-500 mt-1">Servings locked to original recipe</p>
-              )}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold mb-2">Ingredients:</label>
-            <div className="space-y-2 mb-3">
-              {formData.ingredients.map((ing, idx) => (
-                <div key={idx} className="flex gap-2 items-center bg-gray-50 p-2 rounded">
-                  <span className="flex-1">{ing.amount} {ing.unit} {ing.name}</span>
-                  <button
-                    onClick={() => removeIngredient(idx)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-12 gap-2">
-              <input
-                type="text"
-                placeholder="Amount"
-                value={newIngredient.amount}
-                onChange={(e) => setNewIngredient({ ...newIngredient, amount: e.target.value })}
-                className="col-span-2 px-2 py-2 border rounded text-sm"
-              />
-              <input
-                type="text"
-                placeholder="Unit"
-                value={newIngredient.unit}
-                onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
-                className="col-span-2 px-2 py-2 border rounded text-sm"
-              />
-              <input
-                type="text"
-                placeholder="Ingredient name"
-                value={newIngredient.name}
-                onChange={(e) => setNewIngredient({ ...newIngredient, name: e.target.value })}
-                onKeyPress={(e) => e.key === 'Enter' && addIngredient()}
-                className="col-span-7 px-2 py-2 border rounded text-sm"
-              />
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white w-full max-w-xl rounded-2xl shadow-xl p-6 space-y-6">
+
+        <h2 className="text-2xl font-semibold">
+          {recipe ? "Edit Recipe" : "Add Recipe"}
+        </h2>
+
+        {/* Meta */}
+        <div className="grid grid-cols-2 gap-4">
+          <input
+            className="border rounded-lg p-3"
+            placeholder="Recipe name"
+            value={formData.name}
+            onChange={e =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+          />
+
+          <select
+            className="border rounded-lg p-3"
+            value={formData.cuisine}
+            onChange={e =>
+              setFormData({ ...formData, cuisine: e.target.value })
+            }
+          >
+            {["Italian","Mexican","Asian","American","Mediterranean","Indian","French","Other"]
+              .map(c => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+
+        <input
+          type="number"
+          min="1"
+          className="border rounded-lg p-3 w-32"
+          value={formData.servings}
+          onChange={e =>
+            setFormData({ ...formData, servings: +e.target.value })
+          }
+        />
+
+        {/* Ingredients */}
+        <div className="space-y-3">
+          <h3 className="font-medium">Ingredients</h3>
+
+          {formData.ingredients.map((ing, i) => (
+            <div key={i} className="flex justify-between bg-gray-50 p-3 rounded-lg">
+              <span>{ing.amount} {ing.unit} {ing.name}</span>
               <button
-                onClick={addIngredient}
-                className="col-span-1 bg-green-600 text-white rounded hover:bg-green-700"
+                className="text-red-500"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    ingredients: formData.ingredients.filter((_, idx) => idx !== i)
+                  })
+                }
               >
-                <Plus className="w-4 h-4 mx-auto" />
+                ✕
               </button>
             </div>
+          ))}
+
+          <div className="flex gap-2">
+            <input
+              placeholder="Amount"
+              className="border p-2 rounded w-20"
+              value={ingredient.amount}
+              onChange={e => setIngredient({ ...ingredient, amount: e.target.value })}
+            />
+            <input
+              placeholder="Unit"
+              className="border p-2 rounded w-24"
+              value={ingredient.unit}
+              onChange={e => setIngredient({ ...ingredient, unit: e.target.value })}
+            />
+            <input
+              placeholder="Ingredient"
+              className="border p-2 rounded flex-1"
+              value={ingredient.name}
+              onChange={e => setIngredient({ ...ingredient, name: e.target.value })}
+            />
+            <button
+              onClick={addIngredient}
+              className="bg-blue-600 text-white px-4 rounded"
+            >
+              Add
+            </button>
           </div>
         </div>
-        <div className="flex gap-3 pt-4 mt-4 border-t bg-white">
+
+        {/* Actions */}
+        <div className="flex gap-3">
           <button
             onClick={() => onSave(formData)}
-            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="flex-1 bg-green-600 text-white py-3 rounded-lg"
           >
-            Save Recipe
+            Save
           </button>
           <button
             onClick={onCancel}
-            className="flex-1 bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400"
+            className="flex-1 bg-gray-200 py-3 rounded-lg"
           >
             Cancel
           </button>
@@ -269,59 +260,34 @@ const MealPlannerApp = () => {
     return ingredients;
   };
 
-  const handlePDFUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      if (file.name.toLowerCase().endsWith('.pdf')) {
-        const base64Data = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.onerror = () => reject(new Error('Failed to read PDF'));
-          reader.readAsDataURL(file);
-        });
-  const response = await fetch("/api/extract-recipe", {
+const response = await fetch("/api/extract-recipe", {
   method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    base64Data
-  })
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ base64Data })
 });
 
-const rawText = await response.text();
+const data = await response.json();
 
 if (!response.ok) {
-  throw new Error(`Server error: ${rawText}`);
+  throw new Error(data.error || "PDF extraction failed");
 }
 
-let data;
-try {
-  data = JSON.parse(rawText);
-} catch (err) {
-  console.error("Non-JSON response:", rawText);
-  throw new Error("Backend returned invalid JSON");
-}
+const newRecipe = {
+  id: Date.now(),
+  name: file.name.replace(".pdf", ""),
+  cuisine: data.cuisine,
+  ingredients: data.ingredients.length
+    ? data.ingredients
+    : [{ amount: "", unit: "", name: "Add ingredients manually" }],
+  servings: data.servings,
+  baseServings: data.servings,
+  baseIngredients: data.ingredients,
+  lastUsed: null
+};
 
-const textContent =
-  data?.content?.find(c => c.type === 'text')?.text || "";
+setEditingRecipe(newRecipe);
+setShowAddRecipe(true);
 
-const jsonMatch = textContent.match(/\{[\s\S]*\}/);
-
-let extractedData = { servings: 4, cuisine: 'Other', ingredients: [] };
-
-if (jsonMatch) {
-  try {
-    extractedData = JSON.parse(jsonMatch[0]);
-  } catch (err) {
-    console.error('JSON parse error:', err);
-    extractedData.ingredients = extractIngredientsFromText(textContent);
-  }
-} else {
-  extractedData.ingredients = extractIngredientsFromText(textContent);
-}
 
         const newRecipe = {
           id: Date.now(),
